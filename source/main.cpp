@@ -14,6 +14,10 @@ private:
 public:
 	Stone()
 	{
+		randomize();
+	}
+	void randomize()
+	{
 		x = rand()%WINDOW_W;
 		y = rand()%WINDOW_H;
 		radius = rand()%50;
@@ -150,6 +154,14 @@ public:
 			drop->move(stones);
 			drop->draw(renderer);
 		}	
+		const Uint8* buf = SDL_GetKeyboardState(NULL);
+		if (buf[SDL_SCANCODE_RETURN])
+		{
+			for (auto& stone : stones)
+			{
+				stone->randomize();
+			}
+		}
 		//for (auto& stone : stones)
 		{
 			//stone->draw(renderer);
