@@ -79,7 +79,7 @@ private:
 			color.b = rand()%100;
 		}
 		xpos = rand()%WINDOW_W;
-		ypos = -rand()%WINDOW_H;
+		ypos = -(rand()%WINDOW_H * 2);
 		fall_speed = rand()%20;
 	}
 public:
@@ -169,11 +169,26 @@ public:
 	}
 };
 
+void event_handler(SDL_Event& event, bool& isWork)
+{
+	while (1)
+	{
+		while (SDL_PollEvent(&event))
+		{
+			if (event.type == SDL_QUIT || event.key.keysym.sym == SDLK_ESCAPE) 
+			{
+				isWork = false;
+				return;
+			}
+		}
+	}
+}
+
 int main(int argc, char** argv)
 {
-	if (argc != 3) 
+	if (argc != 2) 
 	{
-		std::cerr << "Format:\nwaterfall <drops_count> <threads_count>" << std::endl;
+		std::cerr << "Format:\nwaterfall <drops_count>" << std::endl;
 		return 0;
 	}
 	
@@ -184,7 +199,9 @@ int main(int argc, char** argv)
 	SDL_Window* window = SDL_CreateWindow("Waterfall", 0, 0, WINDOW_W, WINDOW_H, SDL_WINDOW_FULLSCREEN);
 	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
-	Waterfall wf(renderer, std::stoi(argv[1]), std::stoi(argv[2]));
+	unsigned int threads_count = std::thread::hardware_concurrency();
+
+	Waterfall wf(renderer, std::stoi(argv[1]), threads_count);
 
 	bool isWork = true;
 
@@ -193,21 +210,26 @@ int main(int argc, char** argv)
 	DeltaTime dt;
 
 	SDL_ShowCursor(0);
+
+	std::thread handler(event_handler, std::ref(event), std::ref(isWork));
 	while (isWork)
 	{
+#ifdef DEBUG
+		std::cout << "Begin" << std::endl;
+#endif 
 		dt.begin();
-		while (SDL_PollEvent(&event))
-		{
-			if (event.type == SDL_QUIT || event.key.keysym.sym == SDLK_ESCAPE) isWork = false;
-		}
-
+		
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 		SDL_RenderClear(renderer);
 // Draw here
 		wf.update();
 		SDL_RenderPresent(renderer);
 		dt.end();
+#ifdef DEBUG
+		std::cout << "End" << std::endl;
+#endif
 	}
+	handler.join();
 	SDL_Quit();
 	return 0;
 }
