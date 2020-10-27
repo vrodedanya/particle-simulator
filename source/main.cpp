@@ -147,13 +147,29 @@ public:
 			delete drop;
 		}
 	}
+	void update_range(int begin, int end)
+	{
+		for (int i = begin ; i < end ; i++)
+		{
+			drops[i]->move(stones);
+		}
+	}
 	void update()
 	{
+		int MAX_THREADS = std::thread::hardware_concurrency();
+		std::thread threads[MAX_THREADS];
+		for (int i = 0 ; i < MAX_THREADS ; i++)
+		{
+			threads[i] = std::thread(&Waterfall::update_range, this, drops.size() / MAX_THREADS * i, drops.size() / MAX_THREADS * (i + 1)); 
+		}
+		for (int i = 0 ; i < MAX_THREADS ; i++)
+		{
+			threads[i].join();
+		}	
 		for (auto& drop : drops)
 		{
-			drop->move(stones);
 			drop->draw(renderer);
-		}	
+		}
 		const Uint8* buf = SDL_GetKeyboardState(NULL);
 		if (buf[SDL_SCANCODE_RETURN])
 		{
