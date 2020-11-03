@@ -1,9 +1,9 @@
-#include "DeltaTime.h"
 #include <SDL2/SDL.h>
 #include <iostream>
 #include <thread>
 #include <vector>
 #include <cmath>
+#include "dbhelper.h"
 
 #define WINDOW_W 1920
 #define WINDOW_H 1080
@@ -12,15 +12,15 @@ class Stone
 {
 private:
 public:
-	Stone()
+	Stone(unsigned max_stone_size = 300)
 	{
-		randomize();
+		randomize(max_stone_size);
 	}
-	void randomize()
+	void randomize(unsigned max_stone_size)
 	{
 		x = rand()%WINDOW_W;
 		y = rand()%WINDOW_H;
-		radius = rand()%50;
+		radius = rand()%max_stone_size;
 	}
 	int x;
 	int y;
@@ -68,9 +68,9 @@ private:
 		}
 		if (isBlue)
 		{
-			color.r = rand()%100;
-			color.g = rand()%100;
-			color.b = 200 + rand()%55;
+			color.r = 170 + rand()%85;
+			color.g = 150 + rand()%105;
+			color.b = rand()%100;
 		}
 		else
 		{
@@ -100,14 +100,23 @@ public:
 	}
 	void move(std::vector<Stone*>& stones)
 	{
-		ypos += fall_speed * DeltaTime::delta;
+		ypos += fall_speed * DBHelper::delta;
+		int sum = 0;
+		int count = 0;
 		for (auto& stone : stones)
 		{
-			xpos = stone->check_isEnter(xpos, ypos); 
+			int x = stone->check_isEnter(xpos, ypos);
+			if (x!= xpos) 
+			{
+				sum += x; 
+				count++;
+			}
 		}
-		xpos += (-300 + (rand()%500)) * DeltaTime::delta;
+		sum += xpos;
+		xpos = sum / (count + 1);
+		xpos += (-200 + (rand()%500)) * DBHelper::delta;
 
-		fall_speed += DeltaTime::delta * 100;
+		fall_speed += DBHelper::delta * 100;
 		if (ypos > WINDOW_H)
 		{
 			randomize();
@@ -122,9 +131,9 @@ private:
 	std::vector<Drop*> drops;
 	std::vector<Stone*> stones;
 	SDL_Renderer* renderer;
-	unsigned int MAX_THREADS;
+	unsigned MAX_STONE_SIZE;
 public:
-	Waterfall(SDL_Renderer* renderer, unsigned int MAX_DROPS, unsigned int MAX_THREADS)
+	Waterfall(SDL_Renderer* renderer, unsigned int MAX_DROPS, unsigned MAX_STONE_SIZE)
 	{
 		this->renderer = renderer;
 		for (unsigned int i = 0 ; i < MAX_DROPS ; i++)
@@ -133,12 +142,12 @@ public:
 			drops.emplace_back(drop);
 		}
 
-		for (unsigned int i = 0 ; i < (WINDOW_H * WINDOW_W) * 0.0005; i++)
+		for (unsigned int i = 0 ; i < (WINDOW_H * WINDOW_W) * 0.0001; i++)
 		{
-			Stone* stone = new Stone;
+			Stone* stone = new Stone(MAX_STONE_SIZE);
 			stones.emplace_back(stone);
 		}
-		this->MAX_THREADS = MAX_THREADS;
+		this->MAX_STONE_SIZE = MAX_STONE_SIZE;
 	}
 	~Waterfall()
 	{
@@ -175,13 +184,13 @@ public:
 		{
 			for (auto& stone : stones)
 			{
-				stone->randomize();
+				stone->randomize(MAX_STONE_SIZE);
 			}
 		}
-		//for (auto& stone : stones)
+		/*for (auto& stone : stones)
 		{
-			//stone->draw(renderer);
-		}
+			stone->draw(renderer);
+		}*/
 	}
 };
 
@@ -202,9 +211,9 @@ void event_handler(SDL_Event& event, bool& isWork)
 
 int main(int argc, char** argv)
 {
-	if (argc != 2) 
+	if (argc != 3) 
 	{
-		std::cerr << "Format:\nwaterfall <drops_count>" << std::endl;
+		std::cerr << "Format:\nwaterfall <drops_count> <stone_size>" << std::endl;
 		return 0;
 	}
 	
@@ -215,15 +224,11 @@ int main(int argc, char** argv)
 	SDL_Window* window = SDL_CreateWindow("Waterfall", 0, 0, WINDOW_W, WINDOW_H, SDL_WINDOW_FULLSCREEN);
 	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
-	unsigned int threads_count = std::thread::hardware_concurrency();
-
-	Waterfall wf(renderer, std::stoi(argv[1]), threads_count);
+	Waterfall wf(renderer, std::stoi(argv[1]), std::stoi(argv[2]));
 
 	bool isWork = true;
 
 	SDL_Event event;
-
-	DeltaTime dt;
 
 	SDL_ShowCursor(0);
 
@@ -233,14 +238,14 @@ int main(int argc, char** argv)
 #ifdef DEBUG
 		std::cout << "Begin" << std::endl;
 #endif 
-		dt.begin();
+		DBHelper::begin();
 		
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 		SDL_RenderClear(renderer);
 // Draw here
 		wf.update();
 		SDL_RenderPresent(renderer);
-		dt.end();
+		DBHelper::end();
 #ifdef DEBUG
 		std::cout << "End" << std::endl;
 #endif
