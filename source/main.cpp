@@ -4,6 +4,7 @@
 #include <vector>
 #include <cmath>
 #include "dbhelper.h"
+#include "CLI11.hpp"
 
 #define WINDOW_W 1920
 #define WINDOW_H 1080
@@ -211,20 +212,32 @@ void event_handler(SDL_Event& event, bool& isWork)
 
 int main(int argc, char** argv)
 {
-	if (argc != 3) 
-	{
-		std::cerr << "Format:\nwaterfall <drops_count> <stone_size>" << std::endl;
-		return 0;
-	}
-	
+	CLI::App app{"desc"};
+
+	unsigned drop_number = 0;
+	unsigned stones_size = 0;
+	bool isNoFullscreen = false;
+	app.add_option("-d,--dropNumber", drop_number, "Number of drops", false)
+		->required(true);
+	app.add_option("-s,--stonesSize", stones_size, "Stones' size", false)
+		->required(true);
+	app.add_flag("-f,--isNoFullscreen", isNoFullscreen, "Is window no fullscreen mode?");
+		
+	CLI11_PARSE(app, argc, argv);
+
 	srand(time(NULL));
 
 	SDL_Init(SDL_INIT_EVERYTHING);
 
-	SDL_Window* window = SDL_CreateWindow("Waterfall", 0, 0, WINDOW_W, WINDOW_H, SDL_WINDOW_FULLSCREEN);
+	Uint32 flag = SDL_WINDOW_FULLSCREEN;
+	if (isNoFullscreen)
+	{
+		flag = SDL_WINDOW_SHOWN;
+	}
+	SDL_Window* window = SDL_CreateWindow("Waterfall", 0, 0, 1920, 1080, flag);
 	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
-	Waterfall wf(renderer, std::stoi(argv[1]), std::stoi(argv[2]));
+	Waterfall wf(renderer, drop_number, stones_size);
 
 	bool isWork = true;
 
