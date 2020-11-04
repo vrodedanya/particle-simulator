@@ -6,21 +6,20 @@
 #include "dbhelper.h"
 #include "CLI11.hpp"
 
-#define WINDOW_W 1920
-#define WINDOW_H 1080
-
 class Stone
 {
 private:
+	unsigned& dwidth;
+	unsigned& dheight;
 public:
-	Stone(unsigned max_stone_size = 300)
+	Stone(unsigned& display_width, unsigned& display_height, unsigned max_stone_size = 300) : dwidth(display_width), dheight(display_height)
 	{
 		randomize(max_stone_size);
 	}
 	void randomize(unsigned max_stone_size)
 	{
-		x = rand()%WINDOW_W;
-		y = rand()%WINDOW_H;
+		x = rand()%dwidth;
+		y = rand()%dheight;
 		radius = rand()%max_stone_size;
 	}
 	int x;
@@ -59,6 +58,8 @@ private:
 	SDL_Color color;
 	bool isBlue;
 	std::chrono::system_clock::time_point start;
+	unsigned& dwidth;
+	unsigned& dheight;
 	void randomize()
 	{
 		std::chrono::duration<double> diff = std::chrono::system_clock::now() - start;
@@ -79,12 +80,12 @@ private:
 			color.g = rand()%100;
 			color.b = rand()%100;
 		}
-		xpos = rand()%WINDOW_W;
-		ypos = -(rand()%WINDOW_H * 2);
-		fall_speed = rand()%20;
+		xpos = rand()%dwidth;
+		ypos = -(rand()%static_cast<int>(dheight));
+		fall_speed = rand()%(static_cast<int>(dheight) / 54);
 	}
 public:
-	Drop()
+	Drop(unsigned& display_width, unsigned& display_height) : dwidth(display_width), dheight(display_height)
 	{
 		start = std::chrono::system_clock::now();
 		isBlue = true;
@@ -102,6 +103,8 @@ public:
 	void move(std::vector<Stone*>& stones)
 	{
 		ypos += fall_speed * DBHelper::delta;
+		fall_speed += DBHelper::delta * (static_cast<int>(dheight) / 10.8);
+
 		int sum = 0;
 		int count = 0;
 		for (auto& stone : stones)
@@ -117,13 +120,11 @@ public:
 		xpos = sum / (count + 1);
 		xpos += (-200 + (rand()%500)) * DBHelper::delta;
 
-		fall_speed += DBHelper::delta * 100;
-		if (ypos > WINDOW_H)
+		if (ypos > dheight)
 		{
 			randomize();
 		}
 	}
-
 };
 
 class Waterfall
@@ -133,19 +134,21 @@ private:
 	std::vector<Stone*> stones;
 	SDL_Renderer* renderer;
 	unsigned MAX_STONE_SIZE;
+	unsigned& dwidth;
+	unsigned& dheight;
 public:
-	Waterfall(SDL_Renderer* renderer, unsigned int MAX_DROPS, unsigned MAX_STONE_SIZE)
+	explicit Waterfall(SDL_Renderer* renderer, unsigned int MAX_DROPS, unsigned MAX_STONE_SIZE, unsigned& width, unsigned& height) : dwidth(width), dheight(height)
 	{
 		this->renderer = renderer;
 		for (unsigned int i = 0 ; i < MAX_DROPS ; i++)
 		{
-			Drop* drop = new Drop;
+			Drop* drop = new Drop(dwidth, dheight);
 			drops.emplace_back(drop);
 		}
 
-		for (unsigned int i = 0 ; i < (WINDOW_H * WINDOW_W) * 0.0001; i++)
+		for (unsigned int i = 0 ; i < (dwidth * dheight) * 0.0001; i++)
 		{
-			Stone* stone = new Stone(MAX_STONE_SIZE);
+			Stone* stone = new Stone(dwidth, dheight, MAX_STONE_SIZE);
 			stones.emplace_back(stone);
 		}
 		this->MAX_STONE_SIZE = MAX_STONE_SIZE;
@@ -212,11 +215,13 @@ void event_handler(SDL_Event& event, bool& isWork)
 
 int main(int argc, char** argv)
 {
-	CLI::App app{"desc"};
+	CLI::App app{"Waterfall - funny waterfall simulator"};
 
 	unsigned drop_number = 0;
 	unsigned stones_size = 0;
 	bool isNoFullscreen = false;
+	unsigned window_width = 0;
+	unsigned window_height = 0;
 	app.add_option("-d,--dropNumber", drop_number, "Number of drops", false)
 		->required(true);
 	app.add_option("-s,--stonesSize", stones_size, "Stones' size", false)
@@ -224,6 +229,11 @@ int main(int argc, char** argv)
 	app.add_flag("-f,--isNoFullscreen", isNoFullscreen, "Is window no fullscreen mode?");
 		
 	CLI11_PARSE(app, argc, argv);
+
+	if (stones_size == 0 || drop_number == 0)
+	{
+		return 1;
+	}
 
 	srand(time(NULL));
 
@@ -234,10 +244,27 @@ int main(int argc, char** argv)
 	{
 		flag = SDL_WINDOW_SHOWN;
 	}
-	SDL_Window* window = SDL_CreateWindow("Waterfall", 0, 0, 1920, 1080, flag);
+
+	SDL_DisplayMode dm = { SDL_PIXELFORMAT_UNKNOWN, 0, 0, 0, 0 };
+
+	if (SDL_GetDisplayMode(0, 0, &dm) != 0)
+	{
+		std::cerr << SDL_GetError() << std::endl;
+		return 1;
+	}
+	if (window_height == 0)
+	{
+		window_height = dm.h;
+	}
+	if (window_width == 0)
+	{
+		window_width = dm.w;
+	}
+
+	SDL_Window* window = SDL_CreateWindow("Waterfall", 0, 0, window_width, window_height, flag);
 	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
-	Waterfall wf(renderer, drop_number, stones_size);
+	Waterfall wf(renderer, drop_number, stones_size, window_width, window_height);
 
 	bool isWork = true;
 
