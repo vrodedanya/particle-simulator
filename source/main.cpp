@@ -219,14 +219,16 @@ int main(int argc, char** argv)
 
 	unsigned drop_number = 0;
 	unsigned stones_size = 0;
-	bool isNoFullscreen = false;
+	bool isFullscreen = false;
 	unsigned window_width = 0;
 	unsigned window_height = 0;
-	app.add_option("-d,--dropNumber", drop_number, "Number of drops", false)
+	app.add_option("-d,--dropNumber", drop_number, "Number of drops")
 		->required(true);
-	app.add_option("-s,--stonesSize", stones_size, "Stones' size", false)
+	app.add_option("-s,--stonesSize", stones_size, "Stones' size")
 		->required(true);
-	app.add_flag("-f,--isNoFullscreen", isNoFullscreen, "Is window no fullscreen mode?");
+	app.add_flag("-f,--isFullscreen", isFullscreen, "Is window fullscreen mode?");
+	app.add_option("--width", window_width, "Window's width");
+	app.add_option("--height", window_height, "Window's height");
 		
 	CLI11_PARSE(app, argc, argv);
 
@@ -240,7 +242,7 @@ int main(int argc, char** argv)
 	SDL_Init(SDL_INIT_EVERYTHING);
 
 	Uint32 flag = SDL_WINDOW_FULLSCREEN;
-	if (isNoFullscreen)
+	if (!isFullscreen)
 	{
 		flag = SDL_WINDOW_SHOWN;
 	}
