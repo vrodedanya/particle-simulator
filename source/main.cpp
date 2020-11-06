@@ -23,6 +23,10 @@ void event_handler(SDL_Event& event, bool& isWork)
 
 int main(int argc, char** argv)
 {
+	SDL_Init(SDL_INIT_EVERYTHING);
+	srand(time(NULL));
+
+// Parse arguments
 	CLI::App app{"ParticleSimulator"};
 
 	unsigned particle_number = 0;
@@ -42,14 +46,12 @@ int main(int argc, char** argv)
 		
 	CLI11_PARSE(app, argc, argv);
 
-	if (particle_number == 0)
+// Set options
+	if (particle_number <= 0)
 	{
+		std::cerr << "Particle number is equal or lower than zero" << std::endl;
 		return 1;
 	}
-
-	srand(time(NULL));
-
-	SDL_Init(SDL_INIT_EVERYTHING);
 
 	Uint32 flag = SDL_WINDOW_FULLSCREEN;
 	if (!isFullscreen)
@@ -73,36 +75,33 @@ int main(int argc, char** argv)
 		window_width = dm.w;
 	}
 
+// SDL2
 	SDL_Window* window = SDL_CreateWindow("ParticleSimulator", 0, 0, window_width, window_height, flag);
 	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-
 	SDL_Event event;
-
 	Manager* manager;
+
+
 	if (simulator == "waterfall" && stones_size != 0)
 	{
 		manager = new Waterfall(renderer, particle_number, stones_size, window_width, window_height);
+		SDL_ShowCursor(0);
 	}
 	else if (simulator == "fire")
 	{
-		manager = new FireManager(renderer, window_width, window_height, particle_number, event.motion.x, event.motion.y, window_width / 2, window_height, window_width / 5, window_height / 21.6, 0);
+		manager = new FireManager(renderer, window_width, window_height, particle_number, window_width / 2, window_height, window_width / 5, window_height / 21.6, 0);
 	}
 	else
 	{
-		std::cerr << simulator << " doesn't exist" << std::endl;
+		std::cerr << simulator << " simulator doesn't exist" << std::endl;
 		return 1;
 	}
 
 	bool isWork = true;
 
-	//SDL_ShowCursor(0);
-
 	std::thread handler(event_handler, std::ref(event), std::ref(isWork));
 	while (isWork)
 	{
-#ifdef DEBUG
-		std::cout << "Begin" << std::endl;
-#endif 
 		DBHelper::begin();
 		
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
@@ -113,9 +112,6 @@ int main(int argc, char** argv)
 
 		SDL_RenderPresent(renderer);
 		DBHelper::end();
-#ifdef DEBUG
-		std::cout << "End" << std::endl;
-#endif
 	}
 	delete manager;
 	handler.join();

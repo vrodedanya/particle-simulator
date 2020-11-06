@@ -164,6 +164,10 @@ public:
 		{
 			delete drop;
 		}
+		for (auto& stone : stones)
+		{
+			delete stone;
+		}
 	}
 	void update_range(int begin, int end) override
 	{
