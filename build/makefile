@@ -23,7 +23,7 @@ LIBS := -L../libraries -lSDL2 -ldbhelper
 # Defines (ex: -D DEBUG, -Dcount=5)
 DEF :=
 # Directories with source code (ex: source)
-DIR := source
+DIR := source implementation
 
 #---------------------------------------#
 
