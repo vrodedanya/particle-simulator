@@ -1,8 +1,8 @@
 # Particle simulator
 The program creates various simulations. 
-WaterFall
+## WaterFall
 Press enter to change obstacles' sizes and positions.
-Fire
+## Fire
 Particles avoid your cursor
 ## Dependencies
 1. SDL2 library
