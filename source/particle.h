@@ -10,8 +10,6 @@ public:
 	virtual void draw(SDL_Renderer* renderer){};
 	virtual void update(){};
 private:
-	double xpos;
-	double ypos;
 };
 
 #endif

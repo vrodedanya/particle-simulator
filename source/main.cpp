@@ -4,6 +4,7 @@
 #include "CLI11.hpp"
 #include <thread>
 #include "implementation/waterfall.h"
+#include "implementation/fire.h"
 
 void event_handler(SDL_Event& event, bool& isWork)
 {
@@ -22,24 +23,26 @@ void event_handler(SDL_Event& event, bool& isWork)
 
 int main(int argc, char** argv)
 {
-	CLI::App app{"Waterfall - funny waterfall simulator"};
+	CLI::App app{"ParticleSimulator"};
 
-	unsigned drop_number = 0;
+	unsigned particle_number = 0;
 	unsigned stones_size = 0;
 	bool isFullscreen = false;
 	unsigned window_width = 0;
 	unsigned window_height = 0;
-	app.add_option("-d,--dropNumber", drop_number, "Number of drops")
+	std::string simulator{""};
+	app.add_option("--simulator", simulator, "Choose simulator (waterfall/fire)")
 		->required(true);
-	app.add_option("-s,--stonesSize", stones_size, "Stones' size")
+	app.add_option("-p,--particleNumber", particle_number, "Number of particles")
 		->required(true);
+	app.add_option("-s,--stonesSize", stones_size, "Stones' size for waterfall");
 	app.add_flag("-f,--isFullscreen", isFullscreen, "Is window fullscreen mode?");
 	app.add_option("--width", window_width, "Window's width");
 	app.add_option("--height", window_height, "Window's height");
 		
 	CLI11_PARSE(app, argc, argv);
 
-	if (stones_size == 0 || drop_number == 0)
+	if (particle_number == 0)
 	{
 		return 1;
 	}
@@ -70,17 +73,29 @@ int main(int argc, char** argv)
 		window_width = dm.w;
 	}
 
-	SDL_Window* window = SDL_CreateWindow("Waterfall", 0, 0, window_width, window_height, flag);
+	SDL_Window* window = SDL_CreateWindow("ParticleSimulator", 0, 0, window_width, window_height, flag);
 	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-
-	Manager* wf;
-	wf = new Waterfall(renderer, drop_number, stones_size, window_width, window_height);
-
-	bool isWork = true;
 
 	SDL_Event event;
 
-	SDL_ShowCursor(0);
+	Manager* manager;
+	if (simulator == "waterfall" && stones_size != 0)
+	{
+		manager = new Waterfall(renderer, particle_number, stones_size, window_width, window_height);
+	}
+	else if (simulator == "fire")
+	{
+		manager = new FireManager(renderer, window_width, window_height, particle_number, event.motion.x, event.motion.y, window_width / 2, window_height, window_width / 5, window_height / 21.6, 0);
+	}
+	else
+	{
+		std::cerr << simulator << " doesn't exist" << std::endl;
+		return 1;
+	}
+
+	bool isWork = true;
+
+	//SDL_ShowCursor(0);
 
 	std::thread handler(event_handler, std::ref(event), std::ref(isWork));
 	while (isWork)
@@ -93,8 +108,8 @@ int main(int argc, char** argv)
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 		SDL_RenderClear(renderer);
 // Draw here
-		wf->update();
-		wf->draw();
+		manager->update();
+		manager->draw();
 
 		SDL_RenderPresent(renderer);
 		DBHelper::end();
@@ -102,7 +117,7 @@ int main(int argc, char** argv)
 		std::cout << "End" << std::endl;
 #endif
 	}
-	delete wf;
+	delete manager;
 	handler.join();
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
