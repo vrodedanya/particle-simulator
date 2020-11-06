@@ -8,9 +8,9 @@ private:
 
 public:
 	virtual ~Manager(){};
-	void update(){};
-	void update_range(int begin, int end){};
-	void draw(){};
+	virtual void update(){};
+	virtual void update_range(int begin, int end){};
+	virtual void draw(){};
 };
 
 #endif

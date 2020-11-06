@@ -73,7 +73,8 @@ int main(int argc, char** argv)
 	SDL_Window* window = SDL_CreateWindow("Waterfall", 0, 0, window_width, window_height, flag);
 	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
-	Waterfall wf(renderer, drop_number, stones_size, window_width, window_height);
+	Manager* wf;
+	wf = new Waterfall(renderer, drop_number, stones_size, window_width, window_height);
 
 	bool isWork = true;
 
@@ -92,14 +93,19 @@ int main(int argc, char** argv)
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 		SDL_RenderClear(renderer);
 // Draw here
-		wf.update();
+		wf->update();
+		wf->draw();
+
 		SDL_RenderPresent(renderer);
 		DBHelper::end();
 #ifdef DEBUG
 		std::cout << "End" << std::endl;
 #endif
 	}
+	delete wf;
 	handler.join();
+	SDL_DestroyRenderer(renderer);
+	SDL_DestroyWindow(window);
 	SDL_Quit();
 	return 0;
 }

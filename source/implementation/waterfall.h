@@ -87,8 +87,9 @@ private:
 		ypos = -(rand()%static_cast<int>(dheight));
 		fall_speed = rand()%(static_cast<int>(dheight) / 54);
 	}
+	std::vector<Stone*>& stones;
 public:
-	Drop(unsigned& display_width, unsigned& display_height) : dwidth(display_width), dheight(display_height)
+	Drop(unsigned& display_width, unsigned& display_height, std::vector<Stone*>& st) : dwidth(display_width), dheight(display_height), stones(st)
 	{
 		start = std::chrono::system_clock::now();
 		isBlue = true;
@@ -98,12 +99,12 @@ public:
 	{
 	}
 
-	void draw(SDL_Renderer* renderer)
+	void draw(SDL_Renderer* renderer) override
 	{
 		SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, 0);
 		SDL_RenderDrawPoint(renderer, static_cast<int>(xpos), static_cast<int>(ypos));
 	}
-	void update(std::vector<Stone*>& stones)
+	void update() override
 	{
 		ypos += fall_speed * DBHelper::delta;
 		fall_speed += DBHelper::delta * (static_cast<int>(dheight) / 10.8);
@@ -143,18 +144,19 @@ public:
 	explicit Waterfall(SDL_Renderer* renderer, unsigned int MAX_DROPS, unsigned MAX_STONE_SIZE, unsigned& width, unsigned& height) : dwidth(width), dheight(height)
 	{
 		this->renderer = renderer;
-		for (unsigned int i = 0 ; i < MAX_DROPS ; i++)
-		{
-			Drop* drop = new Drop(dwidth, dheight);
-			drops.emplace_back(drop);
-		}
-
 		for (unsigned int i = 0 ; i < (dwidth * dheight) * 0.0001; i++)
 		{
 			Stone* stone = new Stone(dwidth, dheight, MAX_STONE_SIZE);
 			stones.emplace_back(stone);
 		}
-		this->MAX_STONE_SIZE = MAX_STONE_SIZE;
+
+		for (unsigned int i = 0 ; i < MAX_DROPS ; i++)
+		{
+			Drop* drop = new Drop(dwidth, dheight, stones);
+			drops.emplace_back(drop);
+		}
+
+				this->MAX_STONE_SIZE = MAX_STONE_SIZE;
 	}
 	~Waterfall()
 	{
@@ -163,14 +165,14 @@ public:
 			delete drop;
 		}
 	}
-	void update_range(int begin, int end)
+	void update_range(int begin, int end) override
 	{
 		for (int i = begin ; i < end ; i++)
 		{
-			drops[i]->update(stones);
+			drops[i]->update();
 		}
 	}
-	void update()
+	void update() override
 	{
 		int MAX_THREADS = std::thread::hardware_concurrency();
 		std::thread threads[MAX_THREADS];
@@ -198,6 +200,13 @@ public:
 		{
 			stone->draw(renderer);
 		}*/
+	}
+	void draw() override
+	{
+		for (auto& drop : drops)
+		{
+			drop->draw(renderer);
+		}
 	}
 };
 
