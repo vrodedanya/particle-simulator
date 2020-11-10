@@ -7,7 +7,6 @@
 #include <thread>
 #include <SDL2/SDL.h>
 
-
 class Fire : public Particle
 {
 private:
@@ -70,12 +69,12 @@ public:
 			{
 				angle = rand()%365 * 0.0174;
 			
-					if (radius_x != 0) radius_buffer = exclude_radius + rand()%radius_x;
-					particles[i]->x = center_x + cos(angle) * radius_buffer;
-					if (radius_y != 0) radius_buffer = exclude_radius + rand()%radius_y;
-					particles[i]->y = center_y + sin(angle) * radius_buffer;
+				if (radius_x != 0) radius_buffer = exclude_radius + rand()%radius_x;
+				particles[i]->x = center_x + cos(angle) * radius_buffer;
+				if (radius_y != 0) radius_buffer = exclude_radius + rand()%radius_y;
+				particles[i]->y = center_y + sin(angle) * radius_buffer;
 
-					particles[i]->t = 20;
+				particles[i]->t = 20;
 			}
 			else continue;
 		}
@@ -103,15 +102,15 @@ public:
 			{	
 				speed = DBHelper::delta * (30 + particles[i]->t) * (static_cast<int>(dheight) / 120);
 				particles[i]->y -= speed;
-				if (sqrt(pow(particles[i]->x - exclude_x, 2) + pow(particles[i]->y - exclude_y, 2) <= 900))
+				if (pow(particles[i]->x - exclude_x, 2) + pow(particles[i]->y - exclude_y, 2) <= pow(30, 2))
 				{
 					if (particles[i]->x > exclude_x)
 					{
-						particles[i]->x = sqrt(900 - pow(particles[i]->y - exclude_y,2)) + exclude_x;
+						particles[i]->x = sqrt(pow(30, 2) - pow(particles[i]->y - exclude_y, 2)) + exclude_x;
 					}
 					else
 					{
-						particles[i]->x = -1 * sqrt(900 - pow(particles[i]->y - exclude_y,2)) + exclude_x;
+						particles[i]->x = -1 * sqrt(pow(30, 2) - pow(particles[i]->y - exclude_y, 2)) + exclude_x;
 					}
 				}
 				else
@@ -129,7 +128,7 @@ public:
 			for (auto& particle : particles)
 			{
 				if (particles[i] == particle) continue;
-				if (sqrt(pow(particles[i]->x - particle->x, 2) + pow(particles[i]->y - particle->y, 2) <= 40))
+				if (sqrt(pow(particles[i]->x - particle->x, 2) + pow(particles[i]->y - particle->y, 2)) <= 10)
 				{
 					env++;
 				}

@@ -89,7 +89,7 @@ int main(int argc, char** argv)
 	}
 	else if (simulator == "fire")
 	{
-		manager = new FireManager(renderer, window_width, window_height, particle_number, window_width / 2, window_height, window_width / 5, window_height / 21.6, 0);
+		manager = new FireManager(renderer, window_width, window_height, particle_number, event.motion.x, event.motion.y, window_width / 2, window_height, window_width / 5, window_height / 21.6, 0);
 	}
 	else
 	{
