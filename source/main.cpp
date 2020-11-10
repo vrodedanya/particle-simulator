@@ -82,8 +82,13 @@ int main(int argc, char** argv)
 	Manager* manager;
 
 
-	if (simulator == "waterfall" && stones_size != 0)
+	if (simulator == "waterfall")
 	{
+		if (stones_size == 0)
+		{
+			std::cerr << "Enter stones size" << std::endl;
+			return 1;
+		}
 		manager = new Waterfall(renderer, particle_number, stones_size, window_width, window_height);
 		SDL_ShowCursor(0);
 	}
