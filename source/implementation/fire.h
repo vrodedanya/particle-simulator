@@ -15,6 +15,7 @@ public:
 	{
 		x = -1;
 		y = -1;
+		environment = 0;
 	}
 	~Fire()
 	{
@@ -22,6 +23,7 @@ public:
 	double t;
 	double x;
 	double y;
+	unsigned environment;
 
 };
 class FireManager : public Manager
@@ -68,7 +70,6 @@ public:
 			if (particles[i]->y <= 0 || particles[i]->t <= 0)
 			{
 				angle = rand()%365 * 0.0174;
-			
 				if (radius_x != 0) radius_buffer = exclude_radius + rand()%radius_x;
 				particles[i]->x = center_x + cos(angle) * radius_buffer;
 				if (radius_y != 0) radius_buffer = exclude_radius + rand()%radius_y;
@@ -115,7 +116,7 @@ public:
 				}
 				else
 				{
-					particles[i]->x = particles[i]->x + (-300 + rand()%500) * DBHelper::delta;
+					particles[i]->x = particles[i]->x + (-(1920/6.4) + rand()%static_cast<int>(1920/3.84)) * DBHelper::delta;
 				}
 			}
 		}
@@ -124,20 +125,32 @@ public:
 	{
 		for (int i = begin ; i < end ; i++)
 		{
-			int env = 0;
-			for (auto& particle : particles)
+			for (std::vector<Particle*>::size_type j = i + 1 ; j < particles.size() ; j++)
 			{
-				if (particles[i] == particle) continue;
-				if (sqrt(pow(particles[i]->x - particle->x, 2) + pow(particles[i]->y - particle->y, 2)) <= 10)
+				if (sqrt(pow(particles[i]->x - particles[j]->x, 2) + pow(particles[i]->y - particles[j]->y, 2)) <= 10)
 				{
-					env++;
+					particles[i]->environment++;
+					particles[j]->environment++;
 				}
 			}
-			if (env == 0) particles[i]->t -= 4;
-			else if (env >= 10) particles[i]->t++;
 		}
 	}
 
+	void zeroize_env(int begin, int end)
+	{
+		for (int i = begin ; i < end ; i++)
+		{
+			if (particles[i]->environment >= 10)
+			{	
+				particles[i]->t++;
+			}
+			else if (particles[i]->environment == 0)
+			{
+				particles[i]->t-=8;
+			}
+			particles[i]->environment = 0;
+		}
+	}
 	void update()
 	{
 		std::thread threads[threads_count];
@@ -157,7 +170,14 @@ public:
 		{
 			threads[i].join();
 		}
-
+		for (unsigned i = 0 ; i < threads_count ; i++)
+		{
+			threads[i] = std::thread(&FireManager::zeroize_env, this, i * particles.size() / threads_count, particles.size() / threads_count * (i + 1));
+		}
+		for (unsigned i = 0 ; i < threads_count ; i++)
+		{
+			threads[i].join();
+		}
 		for (unsigned i = 0 ; i < threads_count ; i++)
 		{
 			threads[i] = std::thread(&FireManager::move, this, i * particles.size() / threads_count, particles.size() / threads_count * (i + 1));
@@ -166,7 +186,7 @@ public:
 		{
 			threads[i].join();
 		}
-			}
+	}
 };
 
 #endif
