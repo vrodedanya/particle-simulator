@@ -23,7 +23,7 @@ LIBS := -L../libraries -lSDL2 -ldbhelper
 # Defines (ex: -D DEBUG, -Dcount=5)
 DEF :=
 # Directories with source code (ex: source)
-DIR := source implementation
+DIR := source source/implementation
 
 #---------------------------------------#
 
@@ -45,15 +45,16 @@ OBJ_FILES:=$(notdir $(patsubst %$(LANG), %.o, $(FILES)))
 VPATH:=$(SRC)
 
 all: $(OBJ_FILES) 
-	$(CC) $^ $(LIBS) $(LDFLAGS) -o $(NAME)
+	@$(CC) $^ $(LIBS) $(LDFLAGS) -o $(NAME)
+	@echo Linking complete!
 
 static_library: $(filter-out main.o, $(OBJ_FILES))
 	ar cr lib$(NAME).a $^
 
 # Creating object files
 %.o: %$(LANG)
-	$(CC) -c $(CFLAGS) $(DEF) -MD $<
-
+	@$(CC) -c $(CFLAGS) $(DEF) -MD $<
+	@echo $< compiled!
 clean:
 	rm -rf *.o *d $(NAME)
 
