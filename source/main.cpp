@@ -5,6 +5,7 @@
 #include <thread>
 #include "implementation/waterfall.h"
 #include "implementation/fire.h"
+#include "implementation/net.h"
 
 void event_handler(SDL_Event& event, bool& isWork)
 {
@@ -95,6 +96,10 @@ int main(int argc, char** argv)
 	else if (simulator == "fire")
 	{
 		manager = new FireManager(renderer, window_width, window_height, particle_number, event.motion.x, event.motion.y, window_width / 2, window_height, window_width / static_cast<double>(1 + 16000 / particle_number), window_height / 9, 0);
+	}
+	else if (simulator == "net")
+	{
+		manager = new NetManager(renderer, window_width, window_height);
 	}
 	else
 	{

@@ -9,7 +9,7 @@
 #---------------------------------------#
 
 # Program name (ex: test, program)
-NAME := partsimulator 
+NAME := partsimulator
 # Compiler name (ex: gcc, g++, clang)
 CC := g++
 # File extension (ex: .cpp, .c)
@@ -27,10 +27,38 @@ DIR := source source/implementation
 
 #---------------------------------------#
 
+# Colors
+BLACK := \033[0;30m     
+DARKGRAY := \033[1;30m
+RED := \033[0;31m
+LIGHTRED := \033[1;31m
+GREEN := \033[0;32m
+LIGHTGREEN := \033[1;32m
+BROWN := \033[0;33m
+YELLOW := \033[1;33m
+BLUE := \033[0;34m
+LIGHTBLUE := \033[1;34m
+PURPLE := \033[0;35m
+LIGHTPURPLE := \033[1;35m
+CYAN := \033[0;36m
+LIGHTCYAN := \033[1;36m
+LIGHTGRAY := \033[0;37m
+WHITE := \033[1;37m
+NC= \033[0m
+
+#Colorscheme
+
+PROCESS_C := $(LIGHTGREEN)
+FILE_C := $(LIGHTRED)
+FLAGS_C := $(LIGHTBLUE)
+SEPARATOR_C := $(DARKGRAY)
+
+#---------------------------------------#
+
+SRC:=$(DIR)
+
 # Comment this string if you don't use special directory for building project
 SRC:=$(addprefix ../, $(DIR))
-# And uncomment this
-# SRC:=$(DIR)
 
 # Storage template and path to the source files
 SEARCH_FILE:=$(addsuffix /*$(LANG), $(SRC))
@@ -46,7 +74,8 @@ VPATH:=$(SRC)
 
 all: $(OBJ_FILES) 
 	@$(CC) $^ $(LIBS) $(LDFLAGS) -o $(NAME)
-	@echo Linking complete!
+	@echo -e "$(SEPARATOR_C)====================================$(NC)"
+	@echo -e "$(PROCESS_C)Linking:$(NC) $(FILE_C)$(NAME)$(NC) with $(FLAGS_C)$(LDFLAGS) $(LIBS)$(NC)"
 
 static_library: $(filter-out main.o, $(OBJ_FILES))
 	ar cr lib$(NAME).a $^
@@ -54,7 +83,7 @@ static_library: $(filter-out main.o, $(OBJ_FILES))
 # Creating object files
 %.o: %$(LANG)
 	@$(CC) -c $(CFLAGS) $(DEF) -MD $<
-	@echo $< compiled!
+	@echo -e "$(PROCESS_C)Compiling:$(NC) $(FILE_C)$(notdir $<)$(NC) with $(FLAGS_C)$(CFLAGS) $(DEF)$(NC)"
 clean:
 	rm -rf *.o *d $(NAME)
 
