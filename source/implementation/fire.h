@@ -7,6 +7,7 @@
 #include <vector>
 #include <thread>
 #include <SDL2/SDL.h>
+#include <iostream>
 
 class Fire : public Particle
 {
@@ -37,12 +38,17 @@ private:
 	unsigned& dheight;
 	SDL_Event event;
 public:
-	explicit FireManager(SDL_Renderer* renderer, unsigned& window_width, unsigned& window_height, unsigned count, int cen_x, int cen_y, int rad_x, int rad_y, int exc_rad) : center_x(cen_x), center_y(cen_y), exclude_radius(exc_rad), dwidth(window_width), dheight(window_height)
+	explicit FireManager(SDL_Renderer* renderer, unsigned& window_width, unsigned& window_height, unsigned count, int cen_x, int cen_y, int rad_x, int rad_y, int exc_rad) : center_x(cen_x), center_y(cen_y), radius_x(rad_x), radius_y(rad_y), exclude_radius(exc_rad), dwidth(window_width), dheight(window_height)
 	{
 		this->renderer = renderer;
+		std::cout << count << std::endl;
 		for (unsigned i = 0 ; i < count ; i++)
 		{
 			Fire* buf = new Fire;
+			buf->t = 0;
+			buf->x = 0;
+			buf->y = -1;
+			buf->environment = 0;
 			particles.emplace_back(buf);
 		}
 		threads_count = std::thread::hardware_concurrency();

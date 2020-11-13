@@ -66,7 +66,7 @@ void FireManager::move(int begin, int end)
 			}
 			else
 			{
-				particles[i]->x = particles[i]->x + (-(1920/6.4) + rand()%static_cast<int>(1920/3.84)) * DBHelper::delta;
+				particles[i]->x = particles[i]->x + (-(dwidth/6.4) + rand()%static_cast<int>(dwidth/3.84)) * DBHelper::delta;
 			}
 		}
 	}
