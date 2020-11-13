@@ -10,12 +10,13 @@ class Sand : public Particle
 {
 private:
 public:
+	SDL_Rect rect;
 	double x;
 	double y;
 	explicit Sand(double xpos, double ypos);
 	~Sand();
 	void draw(SDL_Renderer* renderer);
-	void update();
+	void update(std::vector<Sand*> sandbox, unsigned dheight);
 	double fall_speed;
 };
 
