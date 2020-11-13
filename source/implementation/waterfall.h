@@ -42,6 +42,7 @@ private:
 	unsigned& dheight;
 	void randomize();
 	std::vector<Stone*>& stones;
+
 public:
 	Drop(unsigned& display_width, unsigned& display_height, std::vector<Stone*>& st) : dwidth(display_width), dheight(display_height), stones(st)
 	{
@@ -66,6 +67,7 @@ private:
 	unsigned MAX_STONE_SIZE;
 	unsigned& dwidth;
 	unsigned& dheight;
+	SDL_Event event;
 public:
 	explicit Waterfall(SDL_Renderer* renderer, unsigned int MAX_DROPS, unsigned MAX_STONE_SIZE, unsigned& width, unsigned& height) : dwidth(width), dheight(height)
 	{
@@ -97,6 +99,7 @@ public:
 	void update_range(int begin, int end);
 	void update();
 	void draw();
+	bool event_handler();
 };
 
 #endif

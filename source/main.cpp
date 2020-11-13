@@ -6,21 +6,7 @@
 #include "implementation/waterfall.h"
 #include "implementation/fire.h"
 #include "implementation/net.h"
-
-void event_handler(SDL_Event& event, bool& isWork)
-{
-	while (1)
-	{
-		while (SDL_PollEvent(&event))
-		{
-			if (event.type == SDL_QUIT || event.key.keysym.sym == SDLK_ESCAPE) 
-			{
-				isWork = false;
-				return;
-			}
-		}
-	}
-}
+#include "implementation/sand.h"
 
 int main(int argc, char** argv)
 {
@@ -36,7 +22,7 @@ int main(int argc, char** argv)
 	unsigned window_width = 0;
 	unsigned window_height = 0;
 	std::string simulator{""};
-	app.add_option("--simulator", simulator, "Choose simulator (waterfall/fire)")
+	app.add_option("--simulator", simulator, "Choose simulator (waterfall/fire/net/sand)")
 		->required(true);
 	app.add_option("-p,--particleNumber", particle_number, "Number of particles")
 		->required(true);
@@ -79,9 +65,8 @@ int main(int argc, char** argv)
 // SDL2
 	SDL_Window* window = SDL_CreateWindow("ParticleSimulator", 0, 0, window_width, window_height, flag);
 	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-	SDL_Event event;
-	Manager* manager;
 
+	Manager* manager;
 
 	if (simulator == "waterfall")
 	{
@@ -95,11 +80,15 @@ int main(int argc, char** argv)
 	}
 	else if (simulator == "fire")
 	{
-		manager = new FireManager(renderer, window_width, window_height, particle_number, event.motion.x, event.motion.y, window_width / 2, window_height, window_width / static_cast<double>(1 + 16000 / particle_number), window_height / 9, 0);
+		manager = new FireManager(renderer, window_width, window_height, particle_number, window_width / 2, window_height, window_width / static_cast<double>(1 + 16000 / particle_number), window_height / 9, 0);
 	}
 	else if (simulator == "net")
 	{
 		manager = new NetManager(renderer, window_width, window_height);
+	}
+	else if (simulator == "sandbox")
+	{
+		manager = new SandManager(renderer, particle_number, window_width, window_height);
 	}
 	else
 	{
@@ -109,7 +98,6 @@ int main(int argc, char** argv)
 
 	bool isWork = true;
 
-	std::thread handler(event_handler, std::ref(event), std::ref(isWork));
 	while (isWork)
 	{
 		DBHelper::begin();
@@ -117,6 +105,7 @@ int main(int argc, char** argv)
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 		SDL_RenderClear(renderer);
 // Draw here
+		isWork = manager->event_handler();
 		manager->update();
 		manager->draw();
 
@@ -124,7 +113,6 @@ int main(int argc, char** argv)
 		DBHelper::end();
 	}
 	delete manager;
-	handler.join();
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();

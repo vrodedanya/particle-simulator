@@ -128,3 +128,18 @@ void Waterfall::draw()
 	}
 }
 
+bool Waterfall::event_handler()
+{
+	while (SDL_PollEvent(&event))
+	{
+		if (event.type == SDL_QUIT)
+		{
+			return false;
+		}
+		else if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)
+		{
+			return false;
+		}
+	}
+	return true;
+}
