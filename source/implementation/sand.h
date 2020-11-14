@@ -16,7 +16,7 @@ public:
 	explicit Sand(double xpos, double ypos);
 	~Sand();
 	void draw(SDL_Renderer* renderer);
-	void update(std::vector<Sand*> sandbox, unsigned dheight);
+	void update(std::vector<Sand*> sandbox, unsigned dwidth, unsigned dheight);
 	double fall_speed;
 };
 

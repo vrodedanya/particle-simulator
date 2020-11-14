@@ -16,7 +16,7 @@ Sand::~Sand()
 {
 }
 
-bool isIn(std::vector<Sand*> sandbox, Sand* checking)
+void isIn(std::vector<Sand*> sandbox, Sand* checking, unsigned dwidth, unsigned dheight)
 {
 	for (auto& sand : sandbox)
 	{
@@ -32,55 +32,92 @@ bool isIn(std::vector<Sand*> sandbox, Sand* checking)
 			SDL_IntersectRect(&sand->rect, &new_pos, &result);
 			if (sand->x > checking->x)
 			{
-				checking->x -= static_cast<double>(result.w / 2);
-				sand->x += static_cast<double>(result.w / 2);
+				if (sand->x + sand->rect.w > dwidth)
+				{
+					checking->x -= static_cast<double>(result.w);
+				}
+				else if(checking->x < 0)
+				{
+					sand->x += static_cast<double>(result.w);
+				}
+				else
+				{
+					sand->x += static_cast<double>(result.w / 2);
+					checking->x -= static_cast<double>(result.w / 2);
+				}
 			}
 			else
 			{
-				sand->x -= static_cast<double>(result.w / 2);
-				checking->x += static_cast<double>(result.w / 2);
+				if (checking->x + checking->rect.w > dwidth)
+				{
+					sand->x -= static_cast<double>(result.w);
+				}
+				else if(sand->x < 0)
+				{
+					checking->x += static_cast<double>(result.w);
+				}
+				else
+				{
+					checking->x += static_cast<double>(result.w / 2);
+					sand->x -= static_cast<double>(result.w / 2);
+				}
 			}
 			if (sand->y > checking->y)
 			{
-				checking->y -= static_cast<double>(result.h / 2);
-				sand->y += static_cast<double>(result.h / 2);
+				checking->fall_speed = 0;
+				if (sand->y + sand->rect.h > dheight)
+				{
+					checking->y -= static_cast<double>(result.h);
+				}
+				else if (checking->y < 0)
+				{
+					sand->y += static_cast<double>(result.h);
+				}
+				else
+				{
+					sand->y += static_cast<double>(result.h / 2);
+					checking->y -= static_cast<double>(result.h / 2);
+				}
 			}
 			else
 			{
-				sand->y -= static_cast<double>(result.h / 2);
-				checking->y += static_cast<double>(result.h / 2);
+				sand->fall_speed = 0;
+				if (checking->y + checking->rect.h > dheight)
+				{
+					sand->y -= static_cast<double>(result.h);
+				}
+				else if (sand->y < 0)
+				{
+					checking->y += static_cast<double>(result.h);
+				}
+				else
+				{
+					checking->y += static_cast<double>(result.h / 2);
+					sand->y -= static_cast<double>(result.h / 2);
+				}
 			}
-			return true;
+			return;
 		}
 	}
-	return false;
 }
 
-void Sand::update(std::vector<Sand*> sandbox, unsigned dheight)
+void Sand::update(std::vector<Sand*> sandbox, unsigned dwidth, unsigned dheight)
 {
-	if (x > -1 || y > -1)
+	if (x >= 0 && y >= 0)
 	{
-		if (!isIn(sandbox, this))
+		if (y + rect.h < dheight)
 		{
 			y += fall_speed * DBHelper::delta;
-			if (y + rect.h> dheight)
-			{
-				fall_speed = 0;
-				y--;
-			}
-			else
-			{
-				fall_speed += 5000 * DBHelper::delta;
-			}
+			fall_speed += 5000 * DBHelper::delta;
 		}
 		else
 		{
-
 			fall_speed = 0;
 		}
+		rect.x = std::round(x);
+		rect.y = std::round(y);
+		isIn(sandbox, this, dwidth, dheight);
 	}
-	rect.x = x;
-	rect.y = y;
 }
 
 void Sand::draw(SDL_Renderer* renderer)
@@ -104,7 +141,7 @@ void SandManager::update()
 	{
 		for (auto& sand : sandbox)
 		{
-			if (sand->x < 0 || sand->y < 0)
+			if (sand->x < 0 || sand->y < 0 || sand->y > dheight)
 			{
 				sand->x = event.motion.x;	
 				sand->y = event.motion.y;
@@ -124,7 +161,7 @@ void SandManager::update()
 	}
 	for (auto& sand : sandbox)
 	{
-		sand->update(sandbox, dheight);
+		sand->update(sandbox, dwidth, dheight);
 	}
 }
 
