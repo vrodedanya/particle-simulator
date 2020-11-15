@@ -36,7 +36,9 @@ private:
 	
 	unsigned& dwidth;
 	unsigned& dheight;
-	SDL_Event event;
+
+	int exclude_x;
+	int exclude_y;
 public:
 	explicit FireManager(SDL_Renderer* renderer, unsigned& window_width, unsigned& window_height, unsigned count, int cen_x, int cen_y, int rad_x, int rad_y, int exc_rad) : center_x(cen_x), center_y(cen_y), radius_x(rad_x), radius_y(rad_y), exclude_radius(exc_rad), dwidth(window_width), dheight(window_height)
 	{
@@ -64,7 +66,7 @@ public:
 	void draw();
 	void move(int begin, int end);
 	void check(int begin, int end);
-	bool event_handler();
+	void event_handler(SDL_Event& event);
 
 	void zeroize_env(int begin, int end);
 	void update();

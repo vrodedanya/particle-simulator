@@ -1,6 +1,7 @@
 #ifndef MANAGER_H
 #define MANAGER_H
 
+#include <SDL2/SDL_events.h>
 
 class Manager
 {
@@ -10,7 +11,7 @@ public:
 	virtual void update(){};
 	virtual void update_range(int begin, int end){};
 	virtual void draw(){};
-	virtual bool event_handler(){return false;}
+	virtual void event_handler(SDL_Event& event){}
 };
 
 #endif

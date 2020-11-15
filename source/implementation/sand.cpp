@@ -10,6 +10,7 @@ Sand::Sand(double xpos, double ypos)
 	rect.y = y;
 	rect.w = 5;
 	rect.h = 5;
+	isMoved = false;
 }
 
 Sand::~Sand()
@@ -32,13 +33,17 @@ void isIn(std::vector<Sand*> sandbox, Sand* checking, unsigned dwidth, unsigned 
 			SDL_IntersectRect(&sand->rect, &new_pos, &result);
 			if (sand->x > checking->x)
 			{
-				if (sand->x + sand->rect.w > dwidth)
+				if (sand->x + sand->rect.w > dwidth || sand->isMoved)
 				{
 					checking->x -= static_cast<double>(result.w);
+					checking->isMoved = true;
+					sand->isMoved = false;
 				}
-				else if(checking->x < 0)
+				else if(checking->x < 0 || checking->isMoved)
 				{
 					sand->x += static_cast<double>(result.w);
+					sand->isMoved = true;
+					checking->isMoved = false;
 				}
 				else
 				{
@@ -48,13 +53,17 @@ void isIn(std::vector<Sand*> sandbox, Sand* checking, unsigned dwidth, unsigned 
 			}
 			else
 			{
-				if (checking->x + checking->rect.w > dwidth)
+				if (checking->x + checking->rect.w > dwidth || checking->isMoved)
 				{
 					sand->x -= static_cast<double>(result.w);
+					sand->isMoved = true;
+					checking->isMoved = false;
 				}
-				else if(sand->x < 0)
+				else if(sand->x < 0 || sand->isMoved)
 				{
 					checking->x += static_cast<double>(result.w);
+					checking->isMoved = true;
+					sand->isMoved = false;
 				}
 				else
 				{
@@ -65,13 +74,17 @@ void isIn(std::vector<Sand*> sandbox, Sand* checking, unsigned dwidth, unsigned 
 			if (sand->y > checking->y)
 			{
 				checking->fall_speed = 0;
-				if (sand->y + sand->rect.h > dheight)
+				if (sand->y + sand->rect.h > dheight || sand->isMoved)
 				{
 					checking->y -= static_cast<double>(result.h);
+					checking->isMoved = true;
+					sand->isMoved = false;
 				}
-				else if (checking->y < 0)
+				else if (checking->y < 0 || checking->isMoved)
 				{
 					sand->y += static_cast<double>(result.h);
+					sand->isMoved = true;
+					checking->isMoved = false;
 				}
 				else
 				{
@@ -82,13 +95,17 @@ void isIn(std::vector<Sand*> sandbox, Sand* checking, unsigned dwidth, unsigned 
 			else
 			{
 				sand->fall_speed = 0;
-				if (checking->y + checking->rect.h > dheight)
+				if (checking->y + checking->rect.h > dheight || checking->isMoved)
 				{
 					sand->y -= static_cast<double>(result.h);
+					sand->isMoved = true;
+					checking->isMoved = false;
 				}
-				else if (sand->y < 0)
+				else if (sand->y < 0 || sand->isMoved)
 				{
 					checking->y += static_cast<double>(result.h);
+					checking->isMoved = true;
+					sand->isMoved = false;
 				}
 				else
 				{
@@ -136,9 +153,31 @@ void SandManager::draw()
 
 void SandManager::update()
 {
-	const Uint8* code = SDL_GetKeyboardState(NULL);
-	if (code[SDL_SCANCODE_SPACE])
+	for (auto& sand : sandbox)
 	{
+		sand->update(sandbox, dwidth, dheight);
+	}
+}
+
+void SandManager::event_handler(SDL_Event& event)
+{
+	if (event.type == SDL_KEYDOWN)
+	{
+		switch (event.key.keysym.sym)
+		{
+			case SDLK_RETURN:
+				for (auto& sand : sandbox)
+				{
+					sand->y = -sand->rect.h;
+					sand->x = -sand->rect.w;
+					sand->fall_speed = 0;
+				}
+				break;
+		}
+	}
+	if (event.type == SDL_MOUSEBUTTONDOWN || isPressed)
+	{
+		isPressed = true;
 		for (auto& sand : sandbox)
 		{
 			if (sand->x < 0 || sand->y < 0 || sand->y > dheight)
@@ -150,33 +189,9 @@ void SandManager::update()
 			}
 		}
 	}
-	if (code[SDL_SCANCODE_RETURN])
+	if (event.type == SDL_MOUSEBUTTONUP)
 	{
-		for (auto& sand : sandbox)
-		{
-			sand->y = -sand->rect.h;
-			sand->x = -sand->rect.w;
-			sand->fall_speed = 0;
-		}
+		isPressed = false;
 	}
-	for (auto& sand : sandbox)
-	{
-		sand->update(sandbox, dwidth, dheight);
-	}
-}
-
-bool SandManager::event_handler()
-{
-	while (SDL_PollEvent(&event))
-	{
-		if (event.type == SDL_QUIT)
-		{
-			return false;
-		}
-		if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)
-		{
-			return false;
-		}
-	}
-	return true;
+		
 }

@@ -98,6 +98,8 @@ int main(int argc, char** argv)
 
 	bool isWork = true;
 
+	SDL_Event event;
+
 	while (isWork)
 	{
 		DBHelper::begin();
@@ -105,7 +107,20 @@ int main(int argc, char** argv)
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 		SDL_RenderClear(renderer);
 // Draw here
-		isWork = manager->event_handler();
+		while (SDL_PollEvent(&event))
+		{
+			if (event.type == SDL_QUIT) isWork = false;
+			if (event.type == SDL_KEYDOWN)
+			{
+				switch (event.key.keysym.sym)
+				{
+					case SDLK_ESCAPE:
+						isWork = false;
+						break;
+				}
+			}
+			manager->event_handler(event);
+		}
 		manager->update();
 		manager->draw();
 

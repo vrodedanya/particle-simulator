@@ -13,6 +13,7 @@ public:
 	SDL_Rect rect;
 	double x;
 	double y;
+	bool isMoved;
 	explicit Sand(double xpos, double ypos);
 	~Sand();
 	void draw(SDL_Renderer* renderer);
@@ -28,9 +29,9 @@ private:
 	unsigned& dwidth;
 	unsigned& dheight;
 
-	SDL_Event event;
+	bool isPressed;
 public:
-	explicit SandManager(SDL_Renderer* render, unsigned part_count, unsigned& window_width, unsigned& window_height) : renderer(render), dwidth(window_width), dheight(window_height)
+	explicit SandManager(SDL_Renderer* render, unsigned part_count, unsigned& window_width, unsigned& window_height) : renderer(render), dwidth(window_width), dheight(window_height), isPressed(false)
 	{
 		for (unsigned i = 0 ; i < part_count ; i++)
 		{
@@ -47,7 +48,7 @@ public:
 	}
 	void draw();
 	void update();
-	bool event_handler();
+	void event_handler(SDL_Event& event);
 };
 
 #endif

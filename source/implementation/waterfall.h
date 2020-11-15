@@ -67,7 +67,6 @@ private:
 	unsigned MAX_STONE_SIZE;
 	unsigned& dwidth;
 	unsigned& dheight;
-	SDL_Event event;
 public:
 	explicit Waterfall(SDL_Renderer* renderer, unsigned int MAX_DROPS, unsigned MAX_STONE_SIZE, unsigned& width, unsigned& height) : dwidth(width), dheight(height)
 	{
@@ -99,7 +98,7 @@ public:
 	void update_range(int begin, int end);
 	void update();
 	void draw();
-	bool event_handler();
+	void event_handler(SDL_Event& event);
 };
 
 #endif

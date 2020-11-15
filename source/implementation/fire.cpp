@@ -53,15 +53,15 @@ void FireManager::move(int begin, int end)
 		{	
 			speed = DBHelper::delta * (30 + particles[i]->t) * (static_cast<int>(dheight) / 120);
 			particles[i]->y -= speed;
-			if (pow(particles[i]->x - event.motion.x, 2) + pow(particles[i]->y - event.motion.y, 2) <= pow(30, 2))
+			if (pow(particles[i]->x - exclude_x, 2) + pow(particles[i]->y - exclude_y, 2) <= pow(30, 2))
 			{
-				if (particles[i]->x > event.motion.x)
+				if (particles[i]->x > exclude_x)
 				{
-					particles[i]->x = sqrt(pow(30, 2) - pow(particles[i]->y - event.motion.y, 2)) + event.motion.x;
+					particles[i]->x = sqrt(pow(30, 2) - pow(particles[i]->y - exclude_y, 2)) + exclude_x;
 				}
 				else
 				{
-					particles[i]->x = -1 * sqrt(pow(30, 2) - pow(particles[i]->y - event.motion.y, 2)) + event.motion.x;
+					particles[i]->x = -1 * sqrt(pow(30, 2) - pow(particles[i]->y - exclude_y, 2)) + exclude_x;
 				}
 			}
 			else
@@ -140,18 +140,11 @@ void FireManager::update()
 	}
 }
 
-bool FireManager::event_handler()
+void FireManager::event_handler(SDL_Event& event)
 {
-	while (SDL_PollEvent(&event))
+	if (event.type == SDL_MOUSEMOTION)
 	{
-		if (event.type == SDL_QUIT)
-		{
-			return false;
-		}
-		else if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)
-		{
-			return false;
-		}
+		exclude_x = event.motion.x;
+		exclude_y = event.motion.y;
 	}
-	return true;
 }
