@@ -76,7 +76,7 @@ void FireManager::check(int begin, int end)
 {
 	for (int i = begin ; i < end ; i++)
 	{
-		for (std::vector<Particle*>::size_type j = i + 1 ; j < particles.size() ; j++)
+		for (std::size_t j = i + 1 ; j < particles.size() ; j++)
 		{
 			if (sqrt(pow(particles[i]->x - particles[j]->x, 2) + pow(particles[i]->y - particles[j]->y, 2)) <= 10)
 			{

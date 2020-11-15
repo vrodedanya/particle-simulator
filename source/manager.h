@@ -7,11 +7,10 @@ class Manager
 {
 private:
 public:
-	virtual ~Manager(){};
-	virtual void update(){};
-	virtual void update_range(int begin, int end){};
-	virtual void draw(){};
-	virtual void event_handler(SDL_Event& event){}
+	virtual ~Manager(){}
+	virtual void update() = 0;
+	virtual void draw() = 0;
+	virtual void event_handler(SDL_Event& event) = 0;
 };
 
 #endif

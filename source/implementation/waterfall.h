@@ -2,7 +2,7 @@
 #define WATERFALL_H
 
 #include "../manager.h"
-#include "../particle.h"
+#include <SDL2/SDL.h>
 #include <vector>
 #include <thread>
 #include <vector>
@@ -29,7 +29,7 @@ public:
 	void draw(SDL_Renderer* renderer);
 };
 
-class Drop : public Particle 
+class Drop 
 {
 private:
 	double xpos;

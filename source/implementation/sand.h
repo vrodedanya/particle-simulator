@@ -2,11 +2,11 @@
 #define SAND_H
 
 #include <vector>
+#include <SDL2/SDL.h>
 #include "../dbhelper.h"
-#include "../particle.h"
 #include "../manager.h"
 
-class Sand : public Particle
+class Sand 
 {
 private:
 public:

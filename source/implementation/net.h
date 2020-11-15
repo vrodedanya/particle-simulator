@@ -2,7 +2,6 @@
 #define NET_H
 
 #include "../manager.h"
-#include "../particle.h"
 #include "../dbhelper.h"
 #include <vector>
 #include <SDL2/SDL.h>
@@ -15,7 +14,7 @@ public:
 	double y;
 };
 
-class net_walker : public Particle
+class net_walker 
 {
 private:
 	int x;
@@ -26,12 +25,12 @@ public:
 		x = rand()%1920;
 		y = rand()%1080;
 	}
-	void draw(SDL_Renderer* renderer) override
+	void draw(SDL_Renderer* renderer)
 	{
 		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 0);
 		SDL_RenderDrawPoint(renderer, x, y);
 	}
-	void update() override
+	void update() 
 	{
 
 	}
@@ -63,7 +62,7 @@ public:
 			delete node;
 		}
 	}
-	void draw() override
+	void draw() 
 	{
 		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 0);
 		for (auto& node : nodes)
@@ -78,7 +77,7 @@ public:
 			}
 		}
 	}
-	void update() override
+	void update() 
 	{
 		for (auto& node : nodes)
 		{
@@ -99,6 +98,9 @@ public:
 				node->y -= 3 * DBHelper::delta;
 			}
 		}
+	}
+	void event_handler(SDL_Event& event)
+	{
 	}
 };
 

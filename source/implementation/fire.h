@@ -1,7 +1,6 @@
 #ifndef FIRE_H
 #define FIRE_H
 
-#include "../particle.h"
 #include "../manager.h"
 #include "../dbhelper.h"
 #include <vector>
@@ -9,7 +8,7 @@
 #include <SDL2/SDL.h>
 #include <iostream>
 
-class Fire : public Particle
+class Fire 
 {
 private:
 public:
@@ -19,6 +18,9 @@ public:
 	double x;
 	double y;
 	unsigned environment;
+
+	void draw(){}
+	void update(){}
 
 };
 class FireManager : public Manager
