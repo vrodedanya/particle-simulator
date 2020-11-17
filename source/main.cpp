@@ -84,7 +84,7 @@ int main(int argc, char** argv)
 	}
 	else if (simulator == "net")
 	{
-		manager = new NetManager(renderer, window_width, window_height);
+		manager = new NetManager(renderer, particle_number, window_width, window_height);
 	}
 	else if (simulator == "sandbox")
 	{
