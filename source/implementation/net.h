@@ -8,15 +8,24 @@
 #include <iostream>
 #include <cmath>
 
+struct Vector3D
+{
+	Vector3D(double x_, double y_, double z_) : x(x_), y(y_), z(z_){} 
+	double x;
+	double y;
+	double z;
+};
+
 class Node
 {
 public:
-	Node() : x(0), y(0), way({1,1}), speed(50 + rand()%150)
+	Node() : x(0), y(0), z(0), way(Vector3D(1,1,1)), speed(50 + rand()%150)
 	{
 	}
 	double x;
 	double y;
-	SDL_Point way;
+	double z;
+	Vector3D way;
 	double speed;
 	int dist(Node& node)
 	{
@@ -29,11 +38,11 @@ public:
 
 	void draw(SDL_Renderer* renderer, int max_radius)
 	{
-		for (double radius = 0 ; radius < max_radius ; radius++)
+		for (double radius = 0 ; radius < -z * static_cast<double>(max_radius - 20) / 600 + max_radius ; radius++)
 		{
 			for (double angle = 0 ; angle < 360 ; angle += static_cast<double>(180 / (M_PI * radius)))
 			{
-				SDL_RenderDrawPoint(renderer, static_cast<int>(x) + std::cos(angle) * radius, static_cast<int>(y) + std::sin(angle) * radius);
+				SDL_RenderDrawPoint(renderer, static_cast<int>(x) + std::cos(angle) * radius , static_cast<int>(y) + std::sin(angle) * radius);
 			}
 		}
 	}
@@ -107,7 +116,7 @@ public:
 					}
 				}
 			}
-			SDL_RenderDrawLine(renderer, node->x, node->y, nodes[min_index]->x, nodes[min_index]->y);
+			//SDL_RenderDrawLine(renderer, node->x, node->y, nodes[min_index]->x, nodes[min_index]->y);
 		}
 	}
 	void update() 
@@ -116,8 +125,11 @@ public:
 		{
 			node->x += node->way.x * node->speed * DBHelper::delta;
 			node->y += node->way.y * node->speed * DBHelper::delta;
-			if (node->x > 600 || node->x < 0) node->way.x *= -1;
-			if (node->y > 600 || node->y < 0) node->way.y *= -1;
+			node->z += node->way.z * node->speed * DBHelper::delta;
+
+			if (node->x + radius + node->z / 20 > dwidth || node->x - radius - node->z / 20 < 0) node->way.x *= -1;
+			if (node->y + radius + node->z / 20 > dheight || node->y - radius - node->z / 20 < 0) node->way.y *= -1;
+			if (node->z > 600 || node->z < 0) node->way.z *= -1;
 		}
 	}
 	void event_handler(SDL_Event& event)
@@ -125,7 +137,7 @@ public:
 		if (event.type == SDL_MOUSEWHEEL)
 		{
 			if (event.wheel.y > 0) radius++;
-			else if (radius > 0) radius--;
+			else if (radius > 30) radius--;
 		}
 	}
 };
