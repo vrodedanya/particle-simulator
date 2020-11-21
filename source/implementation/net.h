@@ -29,21 +29,49 @@ public:
 	double speed;
 	int dist(Node& node)
 	{
-		return dist(node.x, node.y);
+		return dist(node.x, node.y, node.z);
 	}
-	int dist(int xpos, int ypos)
+	int dist(int xpos, int ypos, int zpos)
 	{
-		return (std::sqrt(std::pow(xpos - x, 2) + std::pow(ypos - y, 2)));
+		return (std::sqrt(std::pow(xpos - x, 2) + std::pow(ypos - y, 2) + std::pow(zpos - z, 2)));
 	}
 
 	void draw(SDL_Renderer* renderer, int max_radius)
 	{
-		for (double radius = 0 ; radius < -z * static_cast<double>(max_radius - 20) / 600 + max_radius ; radius++)
+		double real_radius = -z * static_cast<double>(max_radius - 20) / 600 + max_radius;
+		for (int y_ = y - real_radius ; y_ < y + real_radius ; y_++)
 		{
-			for (double angle = 0 ; angle < 360 ; angle += static_cast<double>(180 / (M_PI * radius)))
+			for (int x_ = x - real_radius ; x_ < x + real_radius ; x_++)
 			{
-				SDL_RenderDrawPoint(renderer, static_cast<int>(x) + std::cos(angle) * radius , static_cast<int>(y) + std::sin(angle) * radius);
+				if (std::pow(x_ - x, 2) + std::pow(y_ - y, 2) <= std::pow(real_radius, 2))
+				{
+					SDL_RenderDrawPoint(renderer, x_, y_); 
+				}
 			}
+		}
+	}
+	void drawLineTo(SDL_Renderer* renderer, const Node& node, int width)	
+	{
+		Node n1;
+		Node n2;
+		if (z > node.z)
+		{
+			n1 = *this;
+			n2 = node;
+		}
+		else
+		{
+			n1 = node;
+			n2 = *this;
+		}
+		double prefix = (1 - static_cast<double>(std::abs(z - node.z)) / 600);
+
+		for (int i = -(width / 2) ; i < width / 2 ; i++)
+		{
+			//SDL_RenderDrawLine(renderer, x + i, y, node.x + (width * (1 - (std::abs(z - node.z) / 600))), node.y);
+			//if (i != 0)SDL_RenderDrawLine(renderer, x, y + i, node.x, node.y + (width * (1 - std::abs(z - node.z) / 600)));
+			SDL_RenderDrawLine(renderer, n1.x + i, n1.y, n2.x + i * prefix, n2.y);
+			if (i != 0) SDL_RenderDrawLine(renderer, n1.x, n1.y + i, n2.x, n2.y + i * prefix);
 		}
 	}
 };
@@ -116,7 +144,7 @@ public:
 					}
 				}
 			}
-			//SDL_RenderDrawLine(renderer, node->x, node->y, nodes[min_index]->x, nodes[min_index]->y);
+			node->drawLineTo(renderer, *nodes[min_index], 10);
 		}
 	}
 	void update() 
