@@ -13,7 +13,6 @@ int CAparser(int argc, char** argv, std::string& simulator, unsigned& particle_n
 	app.add_flag("-f,--isFullscreen", isFullscreen, "Is window fullscreen mode?");
 	app.add_option("--width", window_width, "Window's width");
 	app.add_option("--height", window_height, "Window's height");
-	std::cout << "Here" << std::endl;
 
 	CLI11_PARSE(app, argc, argv);
 	return 1;
