@@ -1,20 +1,18 @@
 #include <SDL2/SDL.h>
 #include <iostream>
 #include "dbhelper.h"
-#include "CLI11.hpp"
 #include <thread>
 #include "implementation/waterfall.h"
 #include "implementation/fire.h"
 #include "implementation/net.h"
 #include "implementation/sand.h"
+#include "clishell.h"
 
 int main(int argc, char** argv)
 {
 	SDL_Init(SDL_INIT_EVERYTHING);
 	srand(time(NULL));
 
-// Parse arguments
-	CLI::App app{"ParticleSimulator"};
 
 	unsigned particle_number = 0;
 	unsigned stones_size = 0;
@@ -22,16 +20,8 @@ int main(int argc, char** argv)
 	unsigned window_width = 0;
 	unsigned window_height = 0;
 	std::string simulator{""};
-	app.add_option("--simulator", simulator, "Choose simulator (waterfall/fire/net/sand)")
-		->required(true);
-	app.add_option("-p,--particleNumber", particle_number, "Number of particles")
-		->required(true);
-	app.add_option("-s,--stonesSize", stones_size, "Stones' size for waterfall");
-	app.add_flag("-f,--isFullscreen", isFullscreen, "Is window fullscreen mode?");
-	app.add_option("--width", window_width, "Window's width");
-	app.add_option("--height", window_height, "Window's height");
-		
-	CLI11_PARSE(app, argc, argv);
+
+	CAparser(argc, argv, simulator, particle_number, stones_size, isFullscreen, window_width, window_height);
 
 // Set options
 	if (particle_number <= 0)
