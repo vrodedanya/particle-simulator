@@ -35,6 +35,19 @@ void NetManager::draw()
 	for (auto& node : nodes)
 	{
 		node->draw(renderer);
+		
+	}
+}
+void NetManager::update() 
+{
+	for (auto& node : nodes)
+	{
+		node->x += node->way.x * node->speed * DBHelper::delta;
+		node->y += node->way.y * node->speed * DBHelper::delta;
+
+		if (node->x + node->radius + node->z / 20 > dwidth || node->x - node->radius - node->z / 20 < 0) node->way.x *= -1;
+		if (node->y + node->radius + node->z / 20 > dheight || node->y - node->radius - node->z / 20 < 0) node->way.y *= -1;
+		
 		int min_index = (node != nodes[0]) ? 0 : 1;
 		int min = (node != nodes[0]) ? nodes[0]->dist(*node) : nodes[1]->dist(*node);
 		for (std::size_t i = 0 ; i < nodes.size() ; i++)
@@ -48,17 +61,25 @@ void NetManager::draw()
 				}
 			}
 		}
-	}
-}
-void NetManager::update() 
-{
-	for (auto& node : nodes)
-	{
-		node->x += node->way.x * node->speed * DBHelper::delta;
-		node->y += node->way.y * node->speed * DBHelper::delta;
 
-		if (node->x + node->radius + node->z / 20 > dwidth || node->x - node->radius - node->z / 20 < 0) node->way.x *= -1;
-		if (node->y + node->radius + node->z / 20 > dheight || node->y - node->radius - node->z / 20 < 0) node->way.y *= -1;
+/*		if (min <= static_cast<int>(dheight / 4))
+		{
+			int counter = 0;
+			for (auto& walker : walkers)
+			{
+				if (walker->get_focus() == node && walker->isFree())
+				{
+					walker->change_focus(nodes[min_index]);
+					counter++;
+					if (counter > 10) break;
+				}
+				else if (walker->get_focus() == nodes[min_index] && walker->isFree())
+				{
+					walker->change_focus(node);
+				}
+			}
+		}*/
+
 	}
 	for (auto& walker : walkers)
 	{
@@ -109,7 +130,11 @@ void NetWalker::update(SDL_Renderer* renderer)
 		}
 		else
 		{
-			if (!isInOrbit) radius = node->radius + 10 + rand()%50;
+			if (!isInOrbit)
+			{
+				radius = node->radius + 10 + rand()%50;
+				//radius = node->dist(xpos, ypos);
+			}
 			angle += (speed / 100) * DBHelper::delta;
 			isInOrbit = true;
 			xpos = node->x + std::cos(angle) * radius;

@@ -64,6 +64,8 @@ public:
 	void draw(SDL_Renderer* renderer, int radius);
 	void update(SDL_Renderer* renderer);
 	void change_focus(Node* node){this->node = node;}
+	bool isFree(){return isInOrbit;}
+	Node* get_focus(){return node;}
 };
 
 class NetManager : public Manager
