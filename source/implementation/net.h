@@ -8,6 +8,12 @@
 #include <iostream>
 #include <cmath>
 
+extern "C" {
+#include "lua.h"
+#include "lualib.h"
+#include "lauxlib.h"
+}
+
 struct Vector3D
 {
 	Vector3D(double x_, double y_, double z_) : x(x_), y(y_), z(z_){} 
@@ -22,8 +28,33 @@ private:
 	unsigned& width;
 	unsigned& height;
 public:
-	Node(unsigned& window_width, unsigned& window_height, int radius_) : width(window_width), height(window_height), x(0), y(0), z(0), way(Vector3D(1,1,1)), speed(height / 50 + rand()%static_cast<int>(height / 40)), radius(radius_)
+	Node(unsigned& window_width, unsigned& window_height) : width(window_width), height(window_height), x(0), y(0), z(0), way(Vector3D(1,1,1)), speed(height / 50 + rand()%static_cast<int>(height / 40))
 	{
+		lua_State* lvm = luaL_newstate();
+		if(!luaL_dofile(lvm, "../source/implementation/net_settings.lua"))
+		{
+			lua_getglobal(lvm, "node");
+			lua_getfield(lvm, -1, "radius");
+			lua_getfield(lvm,-2, "orbit_radius");
+			if (lua_isnumber(lvm, -1) && lua_isnumber(lvm, -2))
+			{
+				radius = lua_tonumber(lvm, -2);
+				orbit_radius_ = lua_tonumber(lvm, -1);
+				std::cout << radius << " " << orbit_radius_ << std::endl;
+			}
+			else
+			{
+				std::cerr << "Check your lua setting file" << std::endl;
+				exit(1);
+			}
+		}
+		else
+		{
+			std::cerr << "Hehe, something is going very bad..." << std::endl;
+			std::cerr << lua_tostring(lvm, -1) << std::endl;
+			exit(1);
+		}
+		lua_close(lvm);
 	}
 	double x;
 	double y;
@@ -31,6 +62,7 @@ public:
 	Vector3D way;
 	double speed;
 	int radius;
+	int orbit_radius_;
 	int dist(Node& node);
 	int dist(int xpos, int ypos, int zpos);
 	int dist(int xpos, int ypos);
@@ -85,7 +117,7 @@ public:
 		this->node_count = node_count;
 		for (unsigned i = 0 ; i < node_count ; i++)
 		{
-			Node* buf = new Node(dwidth, dheight, 1);
+			Node* buf = new Node(dwidth, dheight);
 			buf->x = rand()%dwidth;
 			buf->y = rand()%dheight;
 			nodes.emplace_back(buf);

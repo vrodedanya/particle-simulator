@@ -120,7 +120,7 @@ void NetWalker::update(SDL_Renderer* renderer)
 {
 	if (node != nullptr)
 	{
-		if (node->dist(xpos, ypos) > node->radius + 55)
+		if (node->dist(xpos, ypos) > node->radius + node->orbit_radius_)
 		{
 			xpos += (node->x - xpos) / node->dist(xpos, ypos) * speed * DBHelper::delta;
 			ypos += (node->y - ypos) / node->dist(xpos, ypos) * speed * DBHelper::delta;
@@ -132,7 +132,7 @@ void NetWalker::update(SDL_Renderer* renderer)
 		{
 			if (!isInOrbit)
 			{
-				radius = node->radius + 10 + rand()%50;
+				radius = node->radius + rand()%node->orbit_radius_;
 				//radius = node->dist(xpos, ypos);
 			}
 			angle += (speed / 100) * DBHelper::delta;
