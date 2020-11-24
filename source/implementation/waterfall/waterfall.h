@@ -1,13 +1,13 @@
 #ifndef WATERFALL_H
 #define WATERFALL_H
 
-#include "../manager.h"
+#include "../../manager.h"
 #include <SDL2/SDL.h>
 #include <vector>
 #include <thread>
 #include <vector>
 #include <cmath>
-#include "../dbhelper.h"
+#include "../../dbhelper.h"
 
 class Stone
 {

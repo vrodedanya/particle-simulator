@@ -2,10 +2,10 @@
 #include <iostream>
 #include "dbhelper.h"
 #include <thread>
-#include "implementation/waterfall.h"
-#include "implementation/fire.h"
-#include "implementation/net.h"
-#include "implementation/sand.h"
+#include "implementation/waterfall/waterfall.h"
+#include "implementation/fire/fire.h"
+#include "implementation/net/net.h"
+#include "implementation/sand/sand.h"
 #include "clishell.h"
 
 int main(int argc, char** argv)

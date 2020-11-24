@@ -1,8 +1,8 @@
 #ifndef FIRE_H
 #define FIRE_H
 
-#include "../manager.h"
-#include "../dbhelper.h"
+#include "../../manager.h"
+#include "../../dbhelper.h"
 #include <vector>
 #include <thread>
 #include <SDL2/SDL.h>

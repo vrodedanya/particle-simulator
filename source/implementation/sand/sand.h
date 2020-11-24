@@ -3,8 +3,8 @@
 
 #include <vector>
 #include <SDL2/SDL.h>
-#include "../dbhelper.h"
-#include "../manager.h"
+#include "../../dbhelper.h"
+#include "../../manager.h"
 
 class Sand 
 {

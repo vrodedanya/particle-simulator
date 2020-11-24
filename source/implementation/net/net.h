@@ -1,18 +1,13 @@
 #ifndef NET_H
 #define NET_H
 
-#include "../manager.h"
-#include "../dbhelper.h"
+#include "../../manager.h"
+#include "../../dbhelper.h"
 #include <vector>
 #include <SDL2/SDL.h>
 #include <iostream>
 #include <cmath>
-
-extern "C" {
-#include "lua.h"
-#include "lualib.h"
-#include "lauxlib.h"
-}
+#include "../../luafunctions.h"
 
 struct Vector3D
 {
@@ -28,25 +23,34 @@ private:
 	unsigned& width;
 	unsigned& height;
 public:
-	Node(unsigned& window_width, unsigned& window_height) : width(window_width), height(window_height), x(0), y(0), z(0), way(Vector3D(1,1,1)), speed(height / 50 + rand()%static_cast<int>(height / 40))
+	Node(unsigned& window_width, unsigned& window_height) : width(window_width), height(window_height), x(0), y(0), z(0), way(Vector3D(1,1,1))
 	{
 		lua_State* lvm = luaL_newstate();
-		if(!luaL_dofile(lvm, "../source/implementation/net_settings.lua"))
+		if(!luaL_dofile(lvm, "../settings/net_settings.lua"))
 		{
 			lua_getglobal(lvm, "node");
-			lua_getfield(lvm, -1, "radius");
-			lua_getfield(lvm,-2, "orbit_radius");
-			if (lua_isnumber(lvm, -1) && lua_isnumber(lvm, -2))
-			{
-				radius = lua_tonumber(lvm, -2);
-				orbit_radius_ = lua_tonumber(lvm, -1);
-				std::cout << radius << " " << orbit_radius_ << std::endl;
-			}
-			else
-			{
-				std::cerr << "Check your lua setting file" << std::endl;
-				exit(1);
-			}
+			LuaFUNC::get_tableFromTable(lvm, "radius");
+			int min_radius = 0;
+			int max_radius = 0;
+			min_radius = LuaFUNC::get_numberFromTable(lvm, "min_radius");
+			max_radius = LuaFUNC::get_numberFromTable(lvm, "max_radius");
+			radius = min_radius + rand()%max_radius;
+			lua_pop(lvm, 1);
+
+			int min_orbit = 0;
+			int max_orbit = 0;
+			LuaFUNC::get_tableFromTable(lvm, "orbit_radius");
+			min_orbit = LuaFUNC::get_numberFromTable(lvm, "min_radius");
+			max_orbit = LuaFUNC::get_numberFromTable(lvm, "max_radius");
+			orbit_radius_ = min_orbit + rand()%max_orbit;
+			lua_pop(lvm, 1);
+
+			double min_speed = 0;
+			double max_speed = 0;
+			LuaFUNC::get_tableFromTable(lvm, "speed");
+			min_speed = LuaFUNC::get_numberFromTable(lvm, "min_speed");
+			max_speed = LuaFUNC::get_numberFromTable(lvm, "max_speed");
+			speed = min_speed + rand()%static_cast<int>(max_speed);
 		}
 		else
 		{
