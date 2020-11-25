@@ -39,7 +39,16 @@ void FireManager::draw()
 			green =  pow(particle->t, 2);
 			if (green > 255) green = 255;
 			SDL_SetRenderDrawColor(renderer, 255, green, 0, 0);
-			SDL_RenderDrawPoint(renderer, particle->x, particle->y);
+			for (int i = particle->y - 1 ; i < particle->y + 1 ; i++)
+			{
+				for (int j = particle->x - 1 ; j < particle->x + 1 ; j++)
+				{
+					if (std::pow(j - particle->x, 2) + std::pow(i - particle->y,2) <= std::pow(3, 2))
+					{
+						SDL_RenderDrawPoint(renderer, j, i);
+					}
+				}
+			}
 		}
 	}
 }
